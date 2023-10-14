@@ -100,10 +100,6 @@ type UnionCaseArgInfo =
         CliPosition : Lazy<CliPosition>
         /// Specifies that this argument is the main CLI command
         MainCommandName : Lazy<string option>
-        /// If specified, should consume remaining tokens from the CLI
-        IsRest : Lazy<bool>
-        /// If specified, multiple parameters can be added in Configuration in CSV form.
-        AppSettingsCSV : Lazy<bool>
         /// Fails if no argument of this type is specified
         IsMandatory : Lazy<bool>
         /// Indicates that argument should be inherited in the scope of any sibling subcommands.
@@ -222,10 +218,8 @@ type UnionCaseArgInfo with
             AppSettingsSeparators = Array.toList ucai.AppSettingsSeparators
             AppSettingsSplitOptions = ucai.AppSettingsSplitOptions
             IsMainCommand = ucai.IsMainCommand
-            IsRest = ucai.IsRest
             CliPosition = ucai.CliPosition
             CustomAssignmentSeparator = ucai.CustomAssignmentSeparator
-            AppSettingsCSV = ucai.AppSettingsCSV
             IsMandatory = ucai.IsMandatory
             IsUnique = ucai.IsUnique
             IsHidden = ucai.IsHidden

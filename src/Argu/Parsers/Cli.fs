@@ -92,7 +92,7 @@ type CliParseResultAggregator internal (argInfo : UnionArgInfo, stack : CliParse
             error argInfo ErrorCode.CommandLine "argument '%s' should precede all other arguments." result.ParseContext
 
         match lastResult with
-        | Some lr when not (lr.Tag = result.CaseInfo.Tag && lr.CaseInfo.IsRest.Value) ->
+        | Some lr ->
             error argInfo ErrorCode.CommandLine "parameter '%s' should appear after all other arguments." lr.ParseContext
         | _ -> ()
 
@@ -259,8 +259,7 @@ let rec private parseCommandLinePartial (state : CliParseState) (argInfo : Union
 
                         false
 
-                if parseSingleParameter true && mcp.IsRest.Value then
-                    while not state.Reader.IsCompleted && parseSingleParameter false do ()
+                parseSingleParameter true |> ignore
 
             | ListParam(existential, field) ->
                 ignore <| existential.Accept { new IFunc<bool> with
@@ -381,9 +380,6 @@ let rec private parseCommandLinePartial (state : CliParseState) (argInfo : Union
 
         | Primitives fields ->
             parseSingleParameter fields
-            if caseInfo.IsRest.Value then
-                while not state.Reader.IsCompleted do
-                    parseSingleParameter fields
 
         | OptionalParam(existential, field) when caseInfo.IsCustomAssignment ->
             let optArgument = existential.Accept { new IFunc<obj> with
