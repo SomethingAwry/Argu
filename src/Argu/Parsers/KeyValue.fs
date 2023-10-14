@@ -49,7 +49,7 @@ let private parseKeyValuePartial (state : KeyValueParseState) (caseInfo : UnionC
 
                 | Primitives fields ->
                     let tokens =
-                        if caseInfo.AppSettingsCSV.Value || fields.Length > 1 then
+                        if fields.Length > 1 then
                             entry.Split(caseInfo.AppSettingsSeparators, caseInfo.AppSettingsSplitOptions)
                         else [| entry |]
 
@@ -69,11 +69,7 @@ let private parseKeyValuePartial (state : KeyValueParseState) (caseInfo : UnionC
                         let fields = fields |> Array.map parseNext
                         mkUnionCase caseInfo caseInfo.Tag ParseSource.AppSettings name fields
 
-                    let results =
-                        if caseInfo.AppSettingsCSV.Value then [| while !pos < tokens.Length do yield parseSingleArgument () |]
-                        else [| parseSingleArgument () |]
-
-                    success results
+                    success [| parseSingleArgument () |]
 
                 | OptionalParam (existential, fp) ->
                     let parsed = existential.Accept { new IFunc<obj> with

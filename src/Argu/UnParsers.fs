@@ -71,8 +71,6 @@ let mkCommandLineSyntax (argInfo : UnionArgInfo) (prefix : string) (maxWidth : i
                     for p in parsers do
                         yield sprintf " <%s>" p.Description
 
-                if aI.IsRest.Value then yield "..."
-
             | OptionalParam (_,parser) ->
                 match aI.CustomAssignmentSeparator.Value with
                 | Some {Separator = sep} -> yield sprintf "[%s<%s>]" sep parser.Description
@@ -140,8 +138,6 @@ let mkArgUsage width (aI : UnionCaseArgInfo) = stringExpr {
         for i = 1 to parsers.Length - 1 do
             yield sprintf " <%s>" parsers[i].Description
 
-        if aI.IsRest.Value then yield "..."
-
     | Primitives parsers ->
         match aI.CustomAssignmentSeparator.Value with
         | Some {Separator = sep} when parsers.Length = 1 ->
@@ -152,8 +148,6 @@ let mkArgUsage width (aI : UnionCaseArgInfo) = stringExpr {
         | None ->
             for p in parsers do
                 yield sprintf " <%s>" p.Description
-
-        if aI.IsRest.Value then yield "..."
 
     | OptionalParam (_,parser) ->
         match aI.CustomAssignmentSeparator.Value with
