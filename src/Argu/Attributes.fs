@@ -4,16 +4,6 @@ module Argu.ArguAttributes
 
 open System
 
-/// Parse multiple parameters in AppSettings as comma separated values. OBSOLETE
-[<Obsolete("Please use list parameters instead.")>]
-[<AttributeUsage(AttributeTargets.Method ||| AttributeTargets.Property, AllowMultiple = false)>]
-type ParseCSVAttribute () = inherit Attribute ()
-
-/// Consume all remaining CLI tokens using this parameter wherever it might occur. OBSOLETE
-[<Obsolete("Please use list parameters instead.")>]
-[<AttributeUsage(AttributeTargets.Method ||| AttributeTargets.Property, AllowMultiple = false)>]
-type RestAttribute () = inherit Attribute ()
-
 /// Hides argument from command line argument usage string.
 [<AttributeUsage(AttributeTargets.Method ||| AttributeTargets.Property, AllowMultiple = false)>]
 type HiddenAttribute () = inherit Attribute ()
@@ -103,11 +93,6 @@ type MainCommandAttribute (argumentName : string) =
     inherit Attribute()
     new () = MainCommandAttribute(null)
     member _.ArgumentName = argumentName
-
-/// Print F# 3.1 field labels in usage string. OBSOLETE
-[<AttributeUsage(AttributeTargets.Class ||| AttributeTargets.Method ||| AttributeTargets.Property, AllowMultiple = false)>]
-[<Obsolete("Argu 3.0 prints union labels by default. Please remove this attribute.")>]
-type PrintLabelsAttribute () = inherit Attribute ()
 
 /// Use a custom separator for parameter assignment.
 /// e.g. '--param<separator>arg' or '--param key<separator>value'.

@@ -300,13 +300,11 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
     let declaringTypeAttributes = lazy uci.DeclaringType.GetCustomAttributes(true)
 
     let isNoCommandLine = lazy(hasAttribute2<NoCommandLineAttribute> attributes.Value declaringTypeAttributes.Value)
-    let isAppSettingsCSV = lazy(hasAttribute<ParseCSVAttribute> attributes.Value)
     let isExactlyOnce = lazy(hasAttribute2<ExactlyOnceAttribute> attributes.Value declaringTypeAttributes.Value)
     let isMandatory = lazy(isExactlyOnce.Value || hasAttribute2<MandatoryAttribute> attributes.Value declaringTypeAttributes.Value)
     let isUnique = lazy(isExactlyOnce.Value || hasAttribute2<UniqueAttribute> attributes.Value declaringTypeAttributes.Value)
     let isInherited = lazy(hasAttribute<InheritAttribute> attributes.Value)
     let isGatherAll = lazy(hasAttribute<GatherAllSourcesAttribute> attributes.Value)
-    let isRest = lazy(hasAttribute<RestAttribute> attributes.Value)
     let isHidden = lazy(hasAttribute<HiddenAttribute> attributes.Value)
     let isExplicitSubCommand = lazy(hasAttribute<SubCommandAttribute> attributes.Value)
 
@@ -343,8 +341,6 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
                 arguExn "parameter '%O' has %s attribute but specifies %d parameters. Should be 1 only." uci attributeName types.Length
             if types.Length <> 1 && types.Length <> 2 then
                 arguExn "parameter '%O' has %s attribute but specifies %d parameters. Should be 1 or 2." uci attributeName types.Length
-            elif isRest.Value then
-                arguExn "parameter '%O' contains incompatible attributes '%s' and 'Rest'." uci attributeName
         match customAssignment, spaceOrCustomAssignment with
         | Some customAssignment, None ->
             let tolerateSpacedArguments = false
@@ -402,8 +398,6 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
     let checkSubCommand() =
         if Option.isSome customAssignmentSeparator.Value then
             arguExn "CustomAssignment in '%O' not supported in subcommands." uci
-        if isRest.Value then
-            arguExn "Rest attribute in '%O' not supported in subcommands." uci
         if isMandatory.Value then
             arguExn "Mandatory attribute in '%O' not supported in subcommands." uci
         if isMainCommand.Value then
@@ -421,9 +415,6 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
             SubCommand(shape, argInfo, tryExtractUnionParameterLabel fields[0])
 
         | [|Optional t|] ->
-            if isRest.Value then
-                arguExn "Rest attribute in '%O' not supported in optional parameters." uci
-
             if isMainCommand.Value then
                 arguExn "MainCommand attribute in '%O' not supported in optional parameters." uci
 
@@ -434,9 +425,6 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         | [|List t|] ->
             if Option.isSome customAssignmentSeparator.Value then
                 arguExn "CustomAssignment in '%O' not supported for list parameters." uci
-
-            if isRest.Value then
-                arguExn "Rest attribute in '%O' not supported for list parameters." uci
 
             let label = tryExtractUnionParameterLabel fields[0]
 
@@ -488,8 +476,7 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         | [] when isMainCommand.Value ->
             match parsers.Value with
             | Primitives ps ->
-                let name = ps |> Seq.map (fun p -> "<" + p.Description + ">" ) |> String.concat " "
-                if isRest.Value then name + "..." else name
+                ps |> Seq.map (fun p -> "<" + p.Description + ">" ) |> String.concat " "
             | ListParam(_,p) -> "<" + p.Description + ">..."
             | _ -> arguExn "internal error in argu parser representation %O." uci
         | _ when Option.isSome appSettingsName.Value -> appSettingsName.Value.Value
@@ -498,9 +485,6 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
     let fieldReader = Helpers.fieldReader uci
     let fieldCtor = Helpers.tupleConstructor types
     let assignParser = Helpers.assignParser customAssignmentSeparator
-
-    if isAppSettingsCSV.Value && fields.Length <> 1 then
-        arguExn "CSV attribute is only compatible with branches of unary fields."
 
     // extract the description string for given union case
     let description = lazy(
@@ -524,13 +508,11 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         Description = description
         ParameterInfo = parsers
         ArgumentType = argType
-        AppSettingsCSV = isAppSettingsCSV
         MainCommandName = mainCommandName
         IsMandatory = isMandatory
         IsUnique = isUnique
         IsInherited = isInherited
         GatherAllSources = isGatherAll
-        IsRest = isRest
         CliPosition = cliPosition
         CustomAssignmentSeparator = customAssignmentSeparator
         AssignmentParser = assignParser
@@ -678,13 +660,11 @@ let checkUnionArgInfo (result: UnionArgInfo) =
             case.CommandLineNames.Value |> ignore
             case.AppSettingsName.Value |> ignore
             case.ParameterInfo.Value |> ignore
-            case.AppSettingsCSV.Value |> ignore
             case.MainCommandName.Value |> ignore
             case.IsMandatory.Value |> ignore
             case.IsUnique.Value |> ignore
             case.IsInherited.Value |> ignore
             case.GatherAllSources.Value |> ignore
-            case.IsRest.Value |> ignore
             case.CliPosition.Value |> ignore
             case.CustomAssignmentSeparator.Value |> ignore
             case.IsGatherUnrecognized.Value |> ignore

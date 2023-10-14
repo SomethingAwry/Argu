@@ -134,12 +134,8 @@ type ArgumentCaseInfo =
         CliPosition : Lazy<CliPosition>
         /// Specifies that this argument is the main CLI command
         IsMainCommand : bool
-        /// If specified, should consume remaining tokens from the CLI
-        IsRest : Lazy<bool>
         /// Separator token used for EqualsAssignment syntax; e.g. '=' forces '--param=arg' syntax
         CustomAssignmentSeparator : Lazy<CustomAssignmentSeparator option>
-        /// If specified, multiple parameters can be added in AppSettings in CSV form.
-        AppSettingsCSV : Lazy<bool>
         /// Fails if no argument of this type is specified
         IsMandatory : Lazy<bool>
         /// Specifies that argument should be specified at most once in CLI
