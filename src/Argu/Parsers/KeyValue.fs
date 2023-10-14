@@ -1,4 +1,4 @@
-﻿[<AutoOpen>]
+[<AutoOpen>]
 module internal Argu.KeyValueParser
 
 open System
@@ -55,10 +55,10 @@ let private parseKeyValuePartial (state : KeyValueParseState) (caseInfo : UnionC
 
                     let pos = ref 0
                     let parseNext (parser : FieldParserInfo) =
-                        if !pos < tokens.Length then
+                        if pos.Value < tokens.Length then
                             try
-                                let tok = tokens[!pos]
-                                incr pos
+                                let tok = tokens[pos.Value]
+                                pos.Value <- pos.Value + 1
                                 parser.Parser tok
 
                             with _ -> error state.ArgInfo ErrorCode.AppSettings "AppSettings entry '%s' is not <%s>." name parser.Description
