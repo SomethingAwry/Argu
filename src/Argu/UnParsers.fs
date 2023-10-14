@@ -1,4 +1,4 @@
-﻿[<AutoOpen>]
+[<AutoOpen>]
 module internal Argu.UnParsers
 
 open System
@@ -30,13 +30,13 @@ let mkCommandLineSyntax (argInfo : UnionArgInfo) (prefix : string) (maxWidth : i
         let isFirstToken = ref true
         fun (token:string) -> stringExpr {
             let! currLength = StringExpr.currentLength
-            let currLineLength = currLength - !startOfCurrentLine
-            if not !isFirstToken && currLineLength + token.Length > maxWidth then
+            let currLineLength = currLength - startOfCurrentLine.Value
+            if not isFirstToken.Value && currLineLength + token.Length > maxWidth then
                 yield Environment.NewLine
                 yield! StringExpr.whiteSpace offset
-                startOfCurrentLine := currLength + Environment.NewLine.Length
+                startOfCurrentLine.Value <- currLength + Environment.NewLine.Length
             yield token
-            isFirstToken := false
+            isFirstToken.Value <- false
         }
 
     let printedCases =
