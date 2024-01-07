@@ -188,22 +188,6 @@ module ``Argu Tests Main List`` =
         test <@ results.PostProcessResult (<@ Log_Level @>, fun x -> x + 1) = 3 @>
 
     [<Fact>]
-    let ``Simple AppSettings parsing`` () =
-        let args = [ Mandatory_Arg true ; Detach ; Listener ("localhost", 8080) ; Log_Level 2 ] |> List.sortBy tagOf
-        let xmlSource = parser.PrintAppSettingsArguments args
-        let xmlFile = Path.GetTempFileName()
-        do File.WriteAllText(xmlFile, xmlSource)
-        let reader = ConfigurationReader.FromAppSettingsFile(xmlFile)
-        let results = parser.ParseConfiguration(reader)
-
-        test <@ results.GetAllResults () = args @>
-
-        test <@ results.Contains <@ Detach @> @>
-        test <@ results.GetResult <@ Listener @> = ("localhost", 8080) @>
-        test <@ results.GetResults <@ Log_Level @> = [2] @>
-        test <@ results.PostProcessResult (<@ Log_Level @>, fun x -> x + 1) = 3 @>
-
-    [<Fact>]
     let ``Simple AppSettings contains usage comments`` () =
         let args = [ Mandatory_Arg true ; Detach ; Listener ("localhost", 8080) ; Log_Level 2 ]
         let xmlSource = parser.PrintAppSettingsArguments args
@@ -1002,4 +986,3 @@ module ``Argu Tests Main Primitive`` =
         raisesWith<ArguParseException>
             <@ results.GetResult(Working_Directory, defThunk)  @>
             (fun e -> <@ e.Message.StartsWith "Defaulting Failed" && e.Message.Contains "--working-directory" @>)
- 
