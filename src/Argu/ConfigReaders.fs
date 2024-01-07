@@ -1,8 +1,7 @@
-﻿namespace Argu
+namespace Argu
 
 open System
 open System.IO
-open System.Configuration
 open System.Collections.Generic
 open System.Reflection
 

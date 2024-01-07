@@ -1,11 +1,12 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <WarningLevel>5</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
-  <!-- NuGet Metadata -->
+    <!-- NuGet Metadata -->
   <PropertyGroup>
     <Description>A declarative command line and XML configuration parser for F# applications.</Description>
     <Authors>Eirik Tsarpalis</Authors>
