@@ -62,8 +62,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "resource", "resource", "{B1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{A15390A5-BC39-433F-BA25-8775B4C2E329}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Argu.ConfigurationManager", "src\Argu.ConfigurationManager\Argu.ConfigurationManager.fsproj", "{0EA62775-1A5D-46CD-A21B-2120BA73FBF5}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -82,10 +80,6 @@ Global
 		{8E234746-5098-4400-98F1-62C77AB91711}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8E234746-5098-4400-98F1-62C77AB91711}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8E234746-5098-4400-98F1-62C77AB91711}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0EA62775-1A5D-46CD-A21B-2120BA73FBF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0EA62775-1A5D-46CD-A21B-2120BA73FBF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0EA62775-1A5D-46CD-A21B-2120BA73FBF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0EA62775-1A5D-46CD-A21B-2120BA73FBF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
