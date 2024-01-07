@@ -86,7 +86,6 @@ module ``Argu Tests Main List`` =
         | [<AppSettingsSeparator(':')>] Listener of host:string * port:int
         | [<Mandatory>] Mandatory_Arg of bool
         | [<Unique>] Unique_Arg of bool
-        | [<Rest; ParseCSV>] Rest_Arg of int
         | [<MainCommand; Last; Unique>] Main of chars:char list
         | [<Inherit>] Data of int * byte []
         | Log_Level of int
@@ -125,7 +124,6 @@ module ``Argu Tests Main List`` =
                 | Listener _ -> "specify a listener."
                 | Mandatory_Arg _ -> "a mandatory argument."
                 | Unique_Arg _ -> "a unique argument."
-                | Rest_Arg _ -> "an argument that consumes all remaining command line tokens."
                 | Data _ -> "pass raw data in base64 format."
                 | Dir _ -> "Project directory to place the config & database in."
                 | Flex_Equals_Assignment _ -> "An equals assignment which can also be used with a space separator"
@@ -216,11 +214,6 @@ module ``Argu Tests Main List`` =
         test <@ xmlSource.Contains usages[2] = true @>
 
     [<Fact>]
-    let ``AppSettings CSV parsing`` () =
-        let results = parseFunc true (function "rest arg" -> Some("1,2,3,4,5") | _ -> None)
-        test <@ results.GetResults Rest_Arg = [1 .. 5] @>
-
-    [<Fact>]
     let ``AppSettings Flag parsing`` () =
         let results = parseFunc true (function "a" -> Some("true") | "b" -> Some("false") | _ -> None)
         test <@ results.Contains A @>
@@ -297,13 +290,6 @@ module ``Argu Tests Main List`` =
         raisesWith<ArguParseException> <@ parser.ParseCommandLine [| "--mandatory-arg" ; "true" ; "--first-parameter" ; "foo" |] @>
                                         (fun e -> <@ e.Message.Contains "should precede all other" @>)
                                         
-
-    [<Fact>]
-    let ``Rest Parameter`` () =
-        let args = [|1..100|] |> Array.map string |> Array.append [| "--mandatory-arg" ; "true" ; "--rest-arg" |]
-        let result = parser.ParseCommandLine args
-        test <@ result.GetResults Rest_Arg = [1..100] @>
-
     [<Fact>]
     let ``Multiple AltCommandLine`` () =
         let args = [| "--mandatory-arg" ; "true" ; "-z" |]
@@ -865,7 +851,7 @@ module ``Argu Tests Main List`` =
     let ``Fail on malformed case constructors`` () =
         let result = parser.ToParseResults []
         let wrapper = List
-        raises<ArgumentException> <@ result.Contains <@ fun (_y : string) -> Log_Level 42 @> @>
+        raises<ArgumentException> <@ result.Contains <@ fun (_ : string) -> Log_Level 42 @> @>
         raises<ArgumentException> <@ result.Contains <@ fun (y, x) -> Data(x,y) @> @>
         raises<ArgumentException> <@ result.Contains <@ fun x -> () ; Log_Level x @> @>
         raises<ArgumentException> <@ result.Contains <@ let wrapper = List in wrapper @> @>
@@ -914,7 +900,6 @@ module ``Argu Tests Main Primitive`` =
       | [<AppSettingsSeparator(':')>] Listener of host:string * port:int
       | [<Mandatory>] Mandatory_Arg of bool
       | [<Unique>] Unique_Arg of bool
-      | [<Rest; ParseCSV>] Rest_Arg of int
       | [<MainCommand; Last; Unique>] Main of str:string
       | [<Inherit>] Data of int * byte []
       | Log_Level of int
@@ -935,7 +920,6 @@ module ``Argu Tests Main Primitive`` =
               | Listener _ -> "specify a listener."
               | Mandatory_Arg _ -> "a mandatory argument."
               | Unique_Arg _ -> "a unique argument."
-              | Rest_Arg _ -> "an argument that consumes all remaining command line tokens."
               | Data _ -> "pass raw data in base64 format."
               | Dir _ -> "Project directory to place the config & database in."
               | Log_Level _ -> "set the log level."

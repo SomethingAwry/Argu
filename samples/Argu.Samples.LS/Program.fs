@@ -12,6 +12,6 @@ let main argv =
 
     printfn "Got parse results %A" <| results.GetAllResults()
     let files = results.GetResult(Files, defaultValue = [])
-    printfn "Listing files %A" files
+    printfn $"Listing files %A{files}"
 
     0

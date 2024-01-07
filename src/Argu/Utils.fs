@@ -12,9 +12,9 @@ open System.Collections
 
 let allBindings = BindingFlags.NonPublic ||| BindingFlags.Public ||| BindingFlags.Static ||| BindingFlags.Instance
 
-let inline arguExn fmt = Printf.ksprintf(fun msg -> raise <| ArguException(msg)) fmt
+let inline arguExn msg = raise <| ArguException(msg)
 
-let inline arguExnChain exn fmt = Printf.ksprintf(fun msg -> raise <| ArguException(msg, exn)) fmt
+let inline arguExnChain exn msg = raise <| ArguException(msg, exn)
 
 /// get CL arguments from environment
 let getEnvironmentCommandLineArgs () =

@@ -1,4 +1,4 @@
-﻿[<AutoOpen>]
+[<AutoOpen>]
 module internal Argu.PreCompute
 
 #nowarn "44"
@@ -194,12 +194,12 @@ let getPrimitiveParserByType label (t : Type) =
         | NestedParseResults _ -> arguExn "Nested ParseResult<'T> parameters can only occur as standalone parameters in union constructors."
         | Optional _ -> arguExn "F# Option parameters can only occur as standalone parameters in union constructors."
         | List _ -> arguExn "F# List parameters can only occur as standalone parameters in union constructors."
-        | _ -> arguExn "template contains unsupported field of type '%O'." t
+        | _ -> arguExn $"template contains unsupported field of type '{t}'."
 
 let private validCliParamRegex = Regex(@"\S+", RegexOptions.Compiled)
 let validateCliParam (name : string) =
     if name = null || not <| validCliParamRegex.IsMatch name then
-        arguExn "CLI parameter '%s' contains invalid characters." name
+        arguExn $"CLI parameter '%s{name}' contains invalid characters."
 
 let validSeparatorChars = [|'=' ; ':' ; '.' ; '#' ; '+' ; '^' ; '&' ; '?' ; '%' ; '$' ; '~' ; '@'|]
 let private validSeparatorRegex =
@@ -210,8 +210,7 @@ let private validSeparatorRegex =
 let validateSeparator (uci : UnionCaseInfo) (sep : string) =
     if sep = null || not <| validSeparatorRegex.Value.IsMatch sep then
         let allowedchars = validSeparatorChars |> Seq.map (fun c -> String([|''';c;'''|])) |> String.concat ", "
-        arguExn "parameter '%O' specifies invalid separator '%s' in CustomAssignment attribute.%sAllowed characters: %s"
-            uci sep Environment.NewLine allowedchars
+        arguExn $"parameter '{uci}' specifies invalid separator '%s{sep}' in CustomAssignment attribute.%s{Environment.NewLine}Allowed characters: %s{allowedchars}"
 
 /// extracts the subcommand argument hierarchy for given UnionArgInfo
 let getHierarchy (uai : UnionArgInfo) =
@@ -294,27 +293,25 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
 
     // use ref cell for late binding of parent argInfo
     let current = ref None
-    let tryGetCurrent = fun () -> !current
+    let tryGetCurrent = fun () -> current.Value
 
     let attributes = lazy uci.GetCustomAttributes()
     let declaringTypeAttributes = lazy uci.DeclaringType.GetCustomAttributes(true)
 
     let isNoCommandLine = lazy(hasAttribute2<NoCommandLineAttribute> attributes.Value declaringTypeAttributes.Value)
-    let isAppSettingsCSV = lazy(hasAttribute<ParseCSVAttribute> attributes.Value)
     let isExactlyOnce = lazy(hasAttribute2<ExactlyOnceAttribute> attributes.Value declaringTypeAttributes.Value)
     let isMandatory = lazy(isExactlyOnce.Value || hasAttribute2<MandatoryAttribute> attributes.Value declaringTypeAttributes.Value)
     let isUnique = lazy(isExactlyOnce.Value || hasAttribute2<UniqueAttribute> attributes.Value declaringTypeAttributes.Value)
     let isInherited = lazy(hasAttribute<InheritAttribute> attributes.Value)
     let isGatherAll = lazy(hasAttribute<GatherAllSourcesAttribute> attributes.Value)
-    let isRest = lazy(hasAttribute<RestAttribute> attributes.Value)
     let isHidden = lazy(hasAttribute<HiddenAttribute> attributes.Value)
     let isExplicitSubCommand = lazy(hasAttribute<SubCommandAttribute> attributes.Value)
 
     let mainCommandName = lazy(
         match tryGetAttribute<MainCommandAttribute> attributes.Value with
         | None -> None
-        | Some _ when isNoCommandLine.Value -> arguExn "parameter '%O' contains conflicting attributes 'MainCommand' and 'NoCommandLine'." uci
-        | Some _ when types.Length = 0 -> arguExn "parameter '%O' contains MainCommand attribute but has unsupported arity 0." uci
+        | Some _ when isNoCommandLine.Value -> arguExn $"parameter '{uci}' contains conflicting attributes 'MainCommand' and 'NoCommandLine'."
+        | Some _ when types.Length = 0 -> arguExn $"parameter '{uci}' contains MainCommand attribute but has unsupported arity 0."
         | Some attr ->
             match attr.ArgumentName with
             | null -> generateCommandName uci
@@ -330,7 +327,7 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
             | CliPosition.Unspecified
             | CliPosition.First
             | CliPosition.Last as p -> p
-            | _ -> arguExn "Invalid CliPosition setting '%O' for parameter '%O'" attr.Position uci
+            | _ -> arguExn $"Invalid CliPosition setting '{attr.Position}' for parameter '{uci}'"
         | None -> CliPosition.Unspecified)
 
     let customAssignmentSeparator : Lazy<CustomAssignmentSeparator option> = lazy(
@@ -338,13 +335,11 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         let spaceOrCustomAssignment = tryGetAttribute2<CustomAssignmentOrSpacedAttribute> attributes.Value declaringTypeAttributes.Value
         let validateCustomAssignmentAttributes attributeName tolerateSpacedArguments =
             if isMainCommand.Value && types.Length = 1 then
-                arguExn "parameter '%O' of arity 1 contains incompatible attributes '%s' and 'MainCommand'." uci attributeName
+                arguExn $"parameter '{uci}' of arity 1 contains incompatible attributes '%s{attributeName}' and 'MainCommand'."
             if types.Length <> 1 && tolerateSpacedArguments then
-                arguExn "parameter '%O' has %s attribute but specifies %d parameters. Should be 1 only." uci attributeName types.Length
+                arguExn $"parameter '{uci}' has %s{attributeName} attribute but specifies %d{types.Length} parameters. Should be 1 only."
             if types.Length <> 1 && types.Length <> 2 then
-                arguExn "parameter '%O' has %s attribute but specifies %d parameters. Should be 1 or 2." uci attributeName types.Length
-            elif isRest.Value then
-                arguExn "parameter '%O' contains incompatible attributes '%s' and 'Rest'." uci attributeName
+                arguExn $"parameter '{uci}' has %s{attributeName} attribute but specifies %d{types.Length} parameters. Should be 1 or 2."
         match customAssignment, spaceOrCustomAssignment with
         | Some customAssignment, None ->
             let tolerateSpacedArguments = false
@@ -356,7 +351,7 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
             }
             |> Some
         | Some _, Some _ ->
-            arguExn "parameter '%O' contains incompatible attributes 'CustomAssignment' and 'EitherSpaceOrCustomAssignment'." uci
+            arguExn $"parameter '{uci}' contains incompatible attributes 'CustomAssignment' and 'EitherSpaceOrCustomAssignment'."
         | None, Some spaceOrCustomAssignment ->
             let tolerateSpacedArguments = true
             validateCustomAssignmentAttributes "EitherSpaceOrCustomAssignment" tolerateSpacedArguments 
@@ -372,9 +367,9 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
     let isGatherUnrecognized = lazy(
         if hasAttribute<GatherUnrecognizedAttribute> attributes.Value then
             match types with
-            | _ when isMainCommand.Value -> arguExn "parameter '%O' contains incompatible combination of attributes 'MainCommand' and 'GatherUnrecognized'." uci
+            | _ when isMainCommand.Value -> arguExn $"parameter '{uci}' contains incompatible combination of attributes 'MainCommand' and 'GatherUnrecognized'."
             | [|t|] when t = typeof<string> -> true
-            | _ -> arguExn "parameter '%O' has GatherUnrecognized attribute but specifies invalid parameters. Must contain single parameter of type string." uci
+            | _ -> arguExn $"parameter '{uci}' has GatherUnrecognized attribute but specifies invalid parameters. Must contain single parameter of type string."
         else
             false)
 
@@ -382,12 +377,12 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         match tryGetAttribute2<AppSettingsSeparatorAttribute> attributes.Value declaringTypeAttributes.Value with
         | None -> [|","|], StringSplitOptions.None
         | Some attr when attr.Separators.Length = 0 ->
-            arguExn "parameter '%O' specifies a null or empty AppSettings separator." uci
+            arguExn $"parameter '{uci}' specifies a null or empty AppSettings separator."
 
         | Some attr ->
             for sep in attr.Separators do
                 if String.IsNullOrEmpty sep then
-                    arguExn "parameter '%O' specifies a null or empty AppSettings separator." uci
+                    arguExn $"parameter '{uci}' specifies a null or empty AppSettings separator."
 
             attr.Separators, attr.SplitOptions
 
@@ -401,15 +396,13 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
 
     let checkSubCommand() =
         if Option.isSome customAssignmentSeparator.Value then
-            arguExn "CustomAssignment in '%O' not supported in subcommands." uci
-        if isRest.Value then
-            arguExn "Rest attribute in '%O' not supported in subcommands." uci
+            arguExn $"CustomAssignment in '{uci}' not supported in subcommands."
         if isMandatory.Value then
-            arguExn "Mandatory attribute in '%O' not supported in subcommands." uci
+            arguExn $"Mandatory attribute in '{uci}' not supported in subcommands."
         if isMainCommand.Value then
-            arguExn "MainCommand attribute in '%O' not supported in subcommands." uci
+            arguExn $"MainCommand attribute in '{uci}' not supported in subcommands."
         if isInherited.Value then
-            arguExn "Inherit attribute in '%O' not supported in subcommands." uci
+            arguExn $"Inherit attribute in '{uci}' not supported in subcommands."
 
     let parsers = lazy(
         match types with
@@ -421,11 +414,8 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
             SubCommand(shape, argInfo, tryExtractUnionParameterLabel fields[0])
 
         | [|Optional t|] ->
-            if isRest.Value then
-                arguExn "Rest attribute in '%O' not supported in optional parameters." uci
-
             if isMainCommand.Value then
-                arguExn "MainCommand attribute in '%O' not supported in optional parameters." uci
+                arguExn $"MainCommand attribute in '{uci}' not supported in optional parameters."
 
             let label = tryExtractUnionParameterLabel fields[0]
 
@@ -433,10 +423,7 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
 
         | [|List t|] ->
             if Option.isSome customAssignmentSeparator.Value then
-                arguExn "CustomAssignment in '%O' not supported for list parameters." uci
-
-            if isRest.Value then
-                arguExn "Rest attribute in '%O' not supported for list parameters." uci
+                arguExn $"CustomAssignment in '{uci}' not supported for list parameters."
 
             let label = tryExtractUnionParameterLabel fields[0]
 
@@ -445,7 +432,7 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         | _ ->
             if isExplicitSubCommand.Value then
                 if not (Array.isEmpty fields) then
-                    arguExn "SubCommand in '%O' not supported for parameters other than ParseResults<_>." uci
+                    arguExn $"SubCommand in '{uci}' not supported for parameters other than ParseResults<_>."
                 checkSubCommand()
                 NullarySubCommand
             else
@@ -477,9 +464,9 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         else
             match tryGetAttribute<CustomAppSettingsAttribute> attributes.Value with
             | None -> Some <| generateAppSettingsName uci
-            | Some _ when parsers.Value.Type = ArgumentType.SubCommand -> arguExn "CustomAppSettings in %O not supported in subcommands." uci
+            | Some _ when parsers.Value.Type = ArgumentType.SubCommand -> arguExn $"CustomAppSettings in {uci} not supported in subcommands."
             | Some attr when not <| String.IsNullOrWhiteSpace attr.Name -> Some attr.Name
-            | Some attr -> arguExn "AppSettings parameter '%s' contains invalid characters." attr.Name)
+            | Some attr -> arguExn $"AppSettings parameter '%s{attr.Name}' contains invalid characters.")
 
     /// gets the default name of the argument
     let defaultName = lazy(
@@ -488,24 +475,20 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         | [] when isMainCommand.Value ->
             match parsers.Value with
             | Primitives ps ->
-                let name = ps |> Seq.map (fun p -> "<" + p.Description + ">" ) |> String.concat " "
-                if isRest.Value then name + "..." else name
+                ps |> Seq.map (fun p -> "<" + p.Description + ">" ) |> String.concat " "
             | ListParam(_,p) -> "<" + p.Description + ">..."
-            | _ -> arguExn "internal error in argu parser representation %O." uci
+            | _ -> arguExn $"internal error in argu parser representation {uci}."
         | _ when Option.isSome appSettingsName.Value -> appSettingsName.Value.Value
-        | _ -> arguExn "parameter '%O' needs to have at least one parse source." uci)
+        | _ -> arguExn $"parameter '{uci}' needs to have at least one parse source.")
 
     let fieldReader = Helpers.fieldReader uci
     let fieldCtor = Helpers.tupleConstructor types
     let assignParser = Helpers.assignParser customAssignmentSeparator
 
-    if isAppSettingsCSV.Value && fields.Length <> 1 then
-        arguExn "CSV attribute is only compatible with branches of unary fields."
-
     // extract the description string for given union case
     let description = lazy(
         try dummy.Value.Usage
-        with exn -> arguExnChain exn "Error generating usage string from IArgParserTemplate for case %O." uci)
+        with exn -> arguExnChain exn $"Error generating usage string from IArgParserTemplate for case {uci}.")
 
     let uai = {
         Tag = uci.Tag
@@ -524,13 +507,11 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         Description = description
         ParameterInfo = parsers
         ArgumentType = argType
-        AppSettingsCSV = isAppSettingsCSV
         MainCommandName = mainCommandName
         IsMandatory = isMandatory
         IsUnique = isUnique
         IsInherited = isInherited
         GatherAllSources = isGatherAll
-        IsRest = isRest
         CliPosition = cliPosition
         CustomAssignmentSeparator = customAssignmentSeparator
         AssignmentParser = assignParser
@@ -538,16 +519,16 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         IsHidden = isHidden
     }
 
-    current := Some uai // assign result to children
+    current.Value <- Some uai // assign result to children
     uai
 
 and private preComputeUnionArgInfoInner (stack : Type list) (helpParam : HelpParam option) (tryGetParent : unit -> UnionCaseArgInfo option) (t : Type) : UnionArgInfo =
     if not <| FSharpType.IsUnion(t, allBindings) then
-        arguExn "template type '%O' is not an F# union." t
+        arguExn $"template type '{t}' is not an F# union."
     elif stack |> List.exists ((=) t) then
-        arguExn "template type '%O' implements unsupported recursive pattern." t
+        arguExn $"template type '{t}' implements unsupported recursive pattern."
     elif t.IsGenericType then
-        arguExn "template type '%O' is generic; this is not supported." t
+        arguExn $"template type '{t}' is generic; this is not supported."
 
     let helpParam =
         match helpParam with
@@ -569,7 +550,7 @@ and private preComputeUnionArgInfoInner (stack : Type list) (helpParam : HelpPar
 
     // use ref cell for late binding of parent argInfo
     let current = ref Unchecked.defaultof<_>
-    let getCurrent = fun () -> !current
+    let getCurrent = fun () -> current.Value
 
     let caseInfo = lazy(
         FSharpType.GetUnionCases(t, allBindings)
@@ -609,13 +590,13 @@ and private preComputeUnionArgInfoInner (stack : Type list) (helpParam : HelpPar
         match caseInfo.Value |> Array.filter (fun cI -> cI.IsGatherUnrecognized.Value) with
         | [||] -> None
         | [|ur|] -> Some ur
-        | _ -> arguExn "template type '%O' has specified the GatherUnrecognized attribute in more than one union cases." t)
+        | _ -> arguExn $"template type '{t}' has specified the GatherUnrecognized attribute in more than one union cases.")
 
     let mainCommandParam = lazy(
         match caseInfo.Value |> Array.filter (fun cI -> cI.IsMainCommand) with
         | [||] -> None
         | [|mcp|] -> Some mcp
-        | _ -> arguExn "template type '%O' has specified the MainCommand attribute in more than one union cases." t)
+        | _ -> arguExn $"template type '{t}' has specified the MainCommand attribute in more than one union cases.")
 
     let groupedSwitchRegex = Helpers.groupedSwitchRegex caseInfo inheritedParams helpParam
 
@@ -637,7 +618,7 @@ and private preComputeUnionArgInfoInner (stack : Type list) (helpParam : HelpPar
         MainCommandParam = mainCommandParam
     }
 
-    current := result // assign result to children
+    current.Value <- result // assign result to children
     result
 
 and preComputeUnionArgInfo<'Template when 'Template :> IArgParserTemplate> () =
@@ -652,14 +633,13 @@ let checkUnionArgInfo (result: UnionArgInfo) =
         |> Seq.collect (fun arg -> arg.CommandLineNames.Value |> Seq.map (fun cliName -> cliName, arg))
         |> Seq.map (fun (name, arg as t) ->
             if argInfo.HelpParam.IsHelpFlag name then
-                arguExn "parameter '%O' using CLI identifier '%s' which is reserved for help parameters." arg.UnionCaseInfo name
+                arguExn $"parameter '{arg.UnionCaseInfo}' using CLI identifier '%s{name}' which is reserved for help parameters."
             t)
         |> Seq.groupBy fst
         |> Seq.tryFind (fun (_,args) -> Seq.length args > 1)
         |> Option.iter (fun (name,args) ->
             let conflicts = args |> Seq.map snd |> Seq.toArray
-            arguExn "parameters '%O' and '%O' using conflicting CLI identifier '%s'."
-                conflicts[0].UnionCaseInfo conflicts[1].UnionCaseInfo name)
+            arguExn $"parameters '{conflicts[0].UnionCaseInfo}' and '{conflicts[1].UnionCaseInfo}' using conflicting CLI identifier '%s{name}'.")
 
         // check for conflicting AppSettings identifiers
         if argInfo.Depth = 0 then
@@ -669,8 +649,7 @@ let checkUnionArgInfo (result: UnionArgInfo) =
             |> Seq.tryFind(fun (_,args) -> Seq.length args > 1)
             |> Option.iter (fun (name,args) ->
                 let conflicts = args |> Seq.map snd |> Seq.toArray
-                arguExn "parameters '%O' and '%O' using conflicting AppSettings identifier '%s'."
-                    conflicts[0].UnionCaseInfo conflicts[1].UnionCaseInfo name)
+                arguExn $"parameters '{conflicts[0].UnionCaseInfo}' and '{conflicts[1].UnionCaseInfo}' using conflicting AppSettings identifier '%s{name}'.")
 
         // Evaluate every lazy property to ensure that their checks run
         for case in argInfo.Cases.Value do
@@ -678,13 +657,11 @@ let checkUnionArgInfo (result: UnionArgInfo) =
             case.CommandLineNames.Value |> ignore
             case.AppSettingsName.Value |> ignore
             case.ParameterInfo.Value |> ignore
-            case.AppSettingsCSV.Value |> ignore
             case.MainCommandName.Value |> ignore
             case.IsMandatory.Value |> ignore
             case.IsUnique.Value |> ignore
             case.IsInherited.Value |> ignore
             case.GatherAllSources.Value |> ignore
-            case.IsRest.Value |> ignore
             case.CliPosition.Value |> ignore
             case.CustomAssignmentSeparator.Value |> ignore
             case.IsGatherUnrecognized.Value |> ignore
