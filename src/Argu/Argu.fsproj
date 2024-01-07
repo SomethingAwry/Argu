@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
@@ -24,7 +24,5 @@
     <PackageReference Include="DotNet.ReproducibleBuilds" PrivateAssets="All"/>
 
     <PackageReference Include="FSharp.Core"/>
-
-    <PackageReference Include="System.Configuration.ConfigurationManager"/>
   </ItemGroup>
 </Project>

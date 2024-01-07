@@ -1,4 +1,4 @@
-﻿namespace Argu
+namespace Argu
 
 open FSharp.Quotations
 open Argu.UnionArgInfo
@@ -168,7 +168,7 @@ and [<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
         let configurationReader =
             match configurationReader with
             | Some c -> c
-            | None -> ConfigurationReader.FromAppSettings()
+            | None -> ConfigurationReader.NullReader
 
         try
             let appSettingsResults = parseKeyValueConfig configurationReader argInfo
