@@ -7,8 +7,8 @@
     <PackageVersion Include="DotNet.ReproducibleBuilds" Version="1.2.25"/>
 
     <!-- Impl deps -->
-    <PackageVersion Include="FSharp.Core" Version="6.0.0"/>
-    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="4.4.0"/>
+    <PackageVersion Include="FSharp.Core" Version="8.0.401"/>
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="8.0.1"/>
 
     <!-- Test deps -->
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.12.0"/>
