@@ -66,7 +66,7 @@ type AppSettingsConfigurationReader () =
 type AppSettingsConfigurationFileReader private (xmlPath : string, kv : KeyValueConfigurationCollection) =
     member _.Path = xmlPath
     interface IConfigurationReader with
-        member _.Name = sprintf "App.config configuration reader: %s" xmlPath
+        member _.Name = $"App.config configuration reader: %s{xmlPath}"
         member _.GetValue(key:string) =
             match kv[key] with
             | null -> null
@@ -105,7 +105,7 @@ type ConfigurationReader =
     static member FromAppSettings(assembly : Assembly) =
         let path = assembly.Location
         if String.IsNullOrEmpty path then
-            sprintf "Assembly location for '%O' is null or empty." assembly.Location
+            $"Assembly location for '{assembly.Location}' is null or empty."
             |> invalidArg assembly.FullName
 
         AppSettingsConfigurationFileReader.Create(path + ".config") :> IConfigurationReader

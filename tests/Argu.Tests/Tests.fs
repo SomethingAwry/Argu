@@ -913,7 +913,7 @@ module ``Argu Tests Main List`` =
     let ``Fail on malformed case constructors`` () =
         let result = parser.ToParseResults []
         let wrapper = List
-        raises<ArgumentException> <@ result.Contains <@ fun (_y : string) -> Log_Level 42 @> @>
+        raises<ArgumentException> <@ result.Contains <@ fun (_ : string) -> Log_Level 42 @> @>
         raises<ArgumentException> <@ result.Contains <@ fun (y, x) -> Data(x,y) @> @>
         raises<ArgumentException> <@ result.Contains <@ fun x -> () ; Log_Level x @> @>
         raises<ArgumentException> <@ result.Contains <@ let wrapper = List in wrapper @> @>
