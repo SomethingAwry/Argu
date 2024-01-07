@@ -2,14 +2,14 @@
 // FAKE build script 
 // --------------------------------------------------------------------------------------
 
-#r "nuget: System.Reactive        ,5.0.0"
-#r "nuget: Fake.Core.UserInput    ,5.23.1"
-#r "nuget: Fake.Core.ReleaseNotes ,5.23.1"
-#r "nuget: Fake.Core.Target       ,5.23.1"
-#r "nuget: Fake.IO.FileSystem     ,5.23.1"
-#r "nuget: Fake.DotNet.Cli        ,5.23.1"
-#r "nuget: Fake.Tools.Git         ,5.23.1"
-#r "nuget: Fake.Api.Github        ,5.23.1"
+#r "nuget: System.Reactive        ,6.0.0"
+#r "nuget: Fake.Core.UserInput    ,6.0.0"
+#r "nuget: Fake.Core.ReleaseNotes ,6.0.0"
+#r "nuget: Fake.Core.Target       ,6.0.0"
+#r "nuget: Fake.IO.FileSystem     ,6.0.0"
+#r "nuget: Fake.DotNet.Cli        ,6.0.0"
+#r "nuget: Fake.Tools.Git         ,6.0.0"
+#r "nuget: Fake.Api.Github        ,6.0.0"
 
 open Fake.Core
 open Fake.Core.TargetOperators
