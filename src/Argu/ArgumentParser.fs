@@ -168,7 +168,7 @@ and [<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
         let configurationReader =
             match configurationReader with
             | Some c -> c
-            | None -> ConfigurationReader.FromAppSettings()
+            | None -> ConfigurationReader.FromFunction(fun _ -> None)
 
         try
             let appSettingsResults = parseKeyValueConfig configurationReader argInfo
