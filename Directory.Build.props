@@ -16,6 +16,7 @@
     <RepositoryUrl>https://github.com/fsprojects/Argu/</RepositoryUrl>
     <PackageProjectUrl>https://fsprojects.github.io/Argu/</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <VersionPrefix>7.0.0</VersionPrefix>
   </PropertyGroup>
 
   <!-- FsDocs -->
