@@ -1,3 +1,6 @@
+### 7.0.0
+* Use net8.0 for all building
+
 ### 6.2.4
 * Add `AttributeUsage` targets for methods which will be required in .NET 8.0.300 [#243](https://github.com/fsprojects/Argu/pull/243) [@dlidstrom](https://github.com/dlidstrom)
 
