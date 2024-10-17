@@ -1,3 +1,6 @@
+### 7.0.0
+* Use net8.0 for all building
+
 ### 6.2.5
 * Drop Package `FSharp.Core` dependency to `6.0.0` [#264](https://github.com/SwensenSoftware/unquote/pull/264)
 * target Unquote 7.0.1 now that it has [reduced `FSharp.Core` dependencies](https://github.com/SwensenSoftware/unquote/pull/172) [#264](https://github.com/SwensenSoftware/unquote/pull/264)
