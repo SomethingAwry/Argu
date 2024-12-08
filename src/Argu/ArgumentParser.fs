@@ -199,7 +199,7 @@ and [<Sealed; NoEquality; NoComparison; AutoSerializable(false)>]
         match case.ParameterInfo.Value with
         | SubCommand (_,nestedUnion,_) ->
             new ArgumentParser<'SubTemplate>(nestedUnion, _programName, helpTextMessage, _usageStringCharacterWidth, errorHandler)
-        | _ -> arguExn "internal error when fetching subparser %O." uci
+        | _ -> arguExn $"internal error when fetching subparser {uci}."
 
     /// <summary>
     ///     Gets the F# union tag representation for given argument

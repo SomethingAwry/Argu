@@ -30,13 +30,13 @@ type ParseResults<[<EqualityConditionalOn; ComparisonConditionalOn>]'Template wh
         match Array.tryLast results with
         | None ->
             let aI = argInfo.Cases.Value[id.Tag]
-            errorf (not aI.IsCommandLineArg) ErrorCode.PostProcess "ERROR: missing argument '%s'." aI.Name.Value
+            errorf (not aI.IsCommandLineArg) ErrorCode.PostProcess $"ERROR: missing argument '%s{aI.Name.Value}'."
         | Some r when restrictF rs r -> r
-        | Some r -> errorf (not r.CaseInfo.IsCommandLineArg) ErrorCode.PostProcess "ERROR: missing argument '%s'." r.CaseInfo.Name.Value
+        | Some r -> errorf (not r.CaseInfo.IsCommandLineArg) ErrorCode.PostProcess $"ERROR: missing argument '%s{r.CaseInfo.Name.Value}'."
 
     let parseResult (f : 'F -> 'S) (r : UnionCaseParseResult) =
         try f (r.FieldContents :?> 'F)
-        with e -> errorf (not r.CaseInfo.IsCommandLineArg) ErrorCode.PostProcess "ERROR parsing '%s': %s" r.ParseContext e.Message
+        with e -> errorf (not r.CaseInfo.IsCommandLineArg) ErrorCode.PostProcess $"ERROR parsing '%s{r.ParseContext}': %s{e.Message}"
 
     let getAllResults source =
         results.Cases
@@ -299,7 +299,7 @@ type ParseResults<[<EqualityConditionalOn; ComparisonConditionalOn>]'Template wh
         | Some sc -> sc
         | None -> error false ErrorCode.PostProcess "no valid subcommand has been specified."
 
-    override r.ToString() = sprintf "%A" (r.GetAllResults())
+    override r.ToString() = $"%A{r.GetAllResults()}"
 
     // used by StructuredFormatDisplay attribute
     member private r.StructuredFormatDisplay = r.ToString()

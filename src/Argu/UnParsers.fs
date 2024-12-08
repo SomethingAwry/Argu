@@ -46,7 +46,7 @@ let mkCommandLineSyntax (argInfo : UnionArgInfo) (prefix : string) (maxWidth : i
         |> Seq.sortBy (fun aI -> aI.CliPosition.Value)
 
     match argInfo.HelpParam.Flags with
-    | h :: _ -> yield! insertToken (sprintf " [%s]" h)
+    | h :: _ -> yield! insertToken $" [%s{h}]"
     | _ -> ()
 
     for aI in printedCases do
@@ -63,24 +63,24 @@ let mkCommandLineSyntax (argInfo : UnionArgInfo) (prefix : string) (maxWidth : i
             | Primitives parsers ->
                 match aI.CustomAssignmentSeparator.Value with
                 | Some {Separator = sep} when parsers.Length = 1 ->
-                    yield sprintf "%s<%s>" sep parsers[0].Description
+                    yield $"%s{sep}<%s{parsers[0].Description}>"
                 | Some {Separator = sep} ->
                     assert(parsers.Length = 2)
-                    yield sprintf " <%s>%s<%s>" parsers[0].Description sep parsers[1].Description
+                    yield $" <%s{parsers[0].Description}>%s{sep}<%s{parsers[1].Description}>"
                 | None ->
                     for p in parsers do
-                        yield sprintf " <%s>" p.Description
+                        yield $" <%s{p.Description}>"
 
                 if aI.IsRest.Value then yield "..."
 
             | OptionalParam (_,parser) ->
                 match aI.CustomAssignmentSeparator.Value with
-                | Some {Separator = sep} -> yield sprintf "[%s<%s>]" sep parser.Description
-                | None -> yield sprintf " [<%s>]" parser.Description
+                | Some {Separator = sep} -> yield $"[%s{sep}<%s{parser.Description}>]"
+                | None -> yield $" [<%s{parser.Description}>]"
 
             | SubCommand (label = None) -> yield " <options>"
-            | SubCommand (label = Some label) -> yield sprintf " <%s>" label
-            | ListParam (_,parser) -> yield sprintf " [<%s>...]" parser.Description
+            | SubCommand (label = Some label) -> yield $" <%s{label}>"
+            | ListParam (_,parser) -> yield $" [<%s{parser.Description}>...]"
             | NullarySubCommand -> ()
 
             if not aI.IsMandatory.Value then yield ']'
@@ -109,12 +109,12 @@ let mkCommandLineSyntax (argInfo : UnionArgInfo) (prefix : string) (maxWidth : i
             match mc.ParameterInfo.Value with
             | Primitives parsers ->
                 assert(parsers.Length > 0)
-                yield sprintf "<%s>" parsers[0].Description
+                yield $"<%s{parsers[0].Description}>"
                 for i = 1 to parsers.Length - 1 do
-                    yield sprintf " <%s>" parsers[i].Description
+                    yield $" <%s{parsers[i].Description}>"
 
             | ListParam(_, parser) ->
-                yield sprintf "<%s>..." parser.Description
+                yield $"<%s{parser.Description}>..."
 
             | _ -> arguExn "internal error: MainCommand param has invalid internal representation."
             if not mc.IsMandatory.Value then yield ']'
@@ -136,37 +136,37 @@ let mkArgUsage width (aI : UnionCaseArgInfo) = stringExpr {
     match aI.ParameterInfo.Value with
     | Primitives parsers when aI.IsMainCommand ->
         assert(parsers.Length > 0)
-        yield sprintf "<%s>" parsers[0].Description
+        yield $"<%s{parsers[0].Description}>"
         for i = 1 to parsers.Length - 1 do
-            yield sprintf " <%s>" parsers[i].Description
+            yield $" <%s{parsers[i].Description}>"
 
         if aI.IsRest.Value then yield "..."
 
     | Primitives parsers ->
         match aI.CustomAssignmentSeparator.Value with
         | Some {Separator = sep} when parsers.Length = 1 ->
-            yield sprintf "%s<%s>" sep parsers[0].Description
+            yield $"%s{sep}<%s{parsers[0].Description}>"
         | Some {Separator = sep} ->
             assert (parsers.Length = 2)
-            yield sprintf " <%s>%s<%s>" parsers[0].Description sep parsers[1].Description
+            yield $" <%s{parsers[0].Description}>%s{sep}<%s{parsers[1].Description}>"
         | None ->
             for p in parsers do
-                yield sprintf " <%s>" p.Description
+                yield $" <%s{p.Description}>"
 
         if aI.IsRest.Value then yield "..."
 
     | OptionalParam (_,parser) ->
         match aI.CustomAssignmentSeparator.Value with
-        | Some {Separator = sep} -> yield sprintf "[%s<%s>]" sep parser.Description
-        | None -> yield sprintf " [<%s>]" parser.Description
+        | Some {Separator = sep} -> yield $"[%s{sep}<%s{parser.Description}>]"
+        | None -> yield $" [<%s{parser.Description}>]"
 
     | ListParam (_,parser) when aI.IsMainCommand ->
-        yield sprintf "<%s>..." parser.Description
+        yield $"<%s{parser.Description}>..."
 
     | ListParam (_,parser) ->
-        yield sprintf " [<%s>...]" parser.Description
+        yield $" [<%s{parser.Description}>...]"
 
-    | SubCommand(_,_,Some label) -> yield sprintf " <%s>" label
+    | SubCommand(_,_,Some label) -> yield $" <%s{label}>"
     | SubCommand(_,_,None) -> yield " <options>"
     | NullarySubCommand -> ()
 
@@ -243,7 +243,7 @@ let mkUsageString (argInfo : UnionArgInfo) (programName : string) hideSyntax wid
         let! length = StringExpr.currentLength
         if length > 0 then yield Environment.NewLine
         assert(Option.isSome aI.MainCommandName.Value)
-        yield sprintf "%s:" aI.MainCommandName.Value.Value
+        yield $"%s{aI.MainCommandName.Value.Value}:"
         yield Environment.NewLine; yield Environment.NewLine
         yield! mkArgUsage width aI
     | _ -> ()
@@ -261,7 +261,7 @@ let mkUsageString (argInfo : UnionArgInfo) (programName : string) hideSyntax wid
         | helpflag :: _ ->
             yield Environment.NewLine
             let wrappedList =
-                sprintf "Use '%s <subcommand> %s' for additional information." programName helpflag
+                $"Use '%s{programName} <subcommand> %s{helpflag}' for additional information."
                 |> wordwrap (max (width - switchOffset) 1)
 
             for line in wrappedList do
@@ -297,11 +297,11 @@ let rec mkCommandLineArgs (argInfo : UnionArgInfo) (args : seq<obj>) =
             let inline unpars i = parsers[i].UnParser fields[i]
             match aI.CustomAssignmentSeparator.Value with
             | Some {Separator = sep} when parsers.Length = 1 ->
-                yield sprintf "%s%s%s" (clName()) sep (unpars 0)
+                yield $"%s{clName()}%s{sep}%s{unpars 0}"
             | Some {Separator = sep} ->
                 assert(parsers.Length = 2)
                 if not aI.IsMainCommand then yield clName()
-                yield sprintf "%s%s%s" (unpars 0) sep (unpars 1)
+                yield $"%s{unpars 0}%s{sep}%s{unpars 1}"
 
             | None ->
                 if not aI.IsMainCommand then yield clName()
@@ -318,7 +318,7 @@ let rec mkCommandLineArgs (argInfo : UnionArgInfo) (args : seq<obj>) =
             | None -> yield clName()
             | Some v ->
                 match aI.CustomAssignmentSeparator.Value with
-                | Some {Separator = sep} -> yield sprintf "%s%s%s" (clName()) sep (parser.UnParser v)
+                | Some {Separator = sep} -> yield $"%s{clName()}%s{sep}%s{parser.UnParser v}"
                 | None -> yield clName() ; yield parser.UnParser v
 
         | ListParam(_, parser) ->
@@ -401,7 +401,7 @@ let mkAppSettingsDocument (argInfo : UnionArgInfo) printComments (args : 'Templa
                             |> Seq.map (fun t -> fp.UnParser (t :> _))
                             |> String.concat aI.AppSettingsSeparators[0]
 
-                        let mkComment () = sprintf " %s : %s ..." aI.Description.Value fp.Description
+                        let mkComment () = $" %s{aI.Description.Value} : %s{fp.Description} ..."
 
                         mkElem mkComment key values }
 
@@ -413,7 +413,7 @@ let mkAppSettingsDocument (argInfo : UnionArgInfo) printComments (args : 'Templa
                             | None -> ""
                             | Some t -> fp.UnParser (t :> _)
 
-                        let mkComment () = sprintf " %s : ?%s" aI.Description.Value fp.Description
+                        let mkComment () = $" %s{aI.Description.Value} : ?%s{fp.Description}"
 
                         mkElem mkComment key value }
 

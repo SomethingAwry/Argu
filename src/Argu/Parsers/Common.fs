@@ -72,10 +72,10 @@ let postProcessResults (argInfo : UnionArgInfo) (ignoreMissingMandatory : bool)
         match combined, commandLineResults with
         | _, Some { MissingMandatoryCases = (caseArgInfo, missingCases)::_ } when not ignoreMissingMandatory  ->
             let allCasesFormatted = missingCases |> Seq.map (fun c -> c.Name.Value) |> fun v -> System.String.Join("', '", v)
-            error caseArgInfo ErrorCode.PostProcess "missing parameter '%s'." allCasesFormatted
+            error caseArgInfo ErrorCode.PostProcess $"missing parameter '%s{allCasesFormatted}'."
 
         | [||], _ when caseInfo.IsMandatory.Value && not ignoreMissingMandatory ->
-            error argInfo ErrorCode.PostProcess "missing parameter '%s'." caseInfo.Name.Value
+            error argInfo ErrorCode.PostProcess $"missing parameter '%s{caseInfo.Name.Value}'."
         | _ -> combined
 
     {

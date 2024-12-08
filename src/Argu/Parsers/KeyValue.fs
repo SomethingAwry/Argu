@@ -45,7 +45,7 @@ let private parseKeyValuePartial (state : KeyValueParseState) (caseInfo : UnionC
                             let results = [| mkUnionCase caseInfo caseInfo.Tag ParseSource.AppSettings name [||] |]
                             success results
                     else
-                        error state.ArgInfo ErrorCode.AppSettings "AppSettings entry '%s' is not <bool>." name
+                        error state.ArgInfo ErrorCode.AppSettings $"AppSettings entry '%s{name}' is not <bool>."
 
                 | Primitives fields ->
                     let tokens =
@@ -61,9 +61,9 @@ let private parseKeyValuePartial (state : KeyValueParseState) (caseInfo : UnionC
                                 pos.Value <- pos.Value + 1
                                 parser.Parser tok
 
-                            with _ -> error state.ArgInfo ErrorCode.AppSettings "AppSettings entry '%s' is not <%s>." name parser.Description
+                            with _ -> error state.ArgInfo ErrorCode.AppSettings $"AppSettings entry '%s{name}' is not <%s{parser.Description}>."
                         else
-                            error state.ArgInfo ErrorCode.AppSettings "AppSettings entry '%s' missing <%s> argument." name parser.Description
+                            error state.ArgInfo ErrorCode.AppSettings $"AppSettings entry '%s{name}' missing <%s{parser.Description}> argument."
 
                     let parseSingleArgument() =
                         let fields = fields |> Array.map parseNext
@@ -79,7 +79,7 @@ let private parseKeyValuePartial (state : KeyValueParseState) (caseInfo : UnionC
                     let parsed = existential.Accept { new IFunc<obj> with
                         member _.Invoke<'T>() =
                             try fp.Parser entry :?> 'T |> Some :> obj
-                            with _ -> error state.ArgInfo ErrorCode.AppSettings "AppSettings entry '%s' is not <%s>." name fp.Description }
+                            with _ -> error state.ArgInfo ErrorCode.AppSettings $"AppSettings entry '%s{name}' is not <%s{fp.Description}>." }
 
                     let case = mkUnionCase caseInfo caseInfo.Tag ParseSource.AppSettings name [|parsed|]
                     success [|case|]
