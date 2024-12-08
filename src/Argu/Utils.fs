@@ -232,7 +232,7 @@ type StringExprBuilder () =
     member _.YieldFrom (f : StringExpr<unit>) = f
 
     member _.Combine(f : StringExpr<unit>, g : StringExpr<'T>) : StringExpr<'T> = fun b -> f b; g b
-    member _.Delay (f : unit -> StringExpr<'T>) : StringExpr<'T> = fun b -> f () b
+    member _.Delay (f : unit -> StringExpr<'T>) : StringExpr<'T> = f ()
 
     member _.For (xs : 'a seq, f : 'a -> StringExpr<unit>) : StringExpr<unit> =
         fun b ->
