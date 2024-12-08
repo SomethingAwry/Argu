@@ -55,10 +55,10 @@ let private parseKeyValuePartial (state : KeyValueParseState) (caseInfo : UnionC
 
                     let pos = ref 0
                     let parseNext (parser : FieldParserInfo) =
-                        if !pos < tokens.Length then
+                        if pos.Value < tokens.Length then
                             try
-                                let tok = tokens[!pos]
-                                incr pos
+                                let tok = tokens[pos.Value]
+                                pos.Value <- pos.Value + 1
                                 parser.Parser tok
 
                             with _ -> error state.ArgInfo ErrorCode.AppSettings "AppSettings entry '%s' is not <%s>." name parser.Description
@@ -70,7 +70,7 @@ let private parseKeyValuePartial (state : KeyValueParseState) (caseInfo : UnionC
                         mkUnionCase caseInfo caseInfo.Tag ParseSource.AppSettings name fields
 
                     let results =
-                        if caseInfo.AppSettingsCSV.Value then [| while !pos < tokens.Length do yield parseSingleArgument () |]
+                        if caseInfo.AppSettingsCSV.Value then [| while pos.Value < tokens.Length do yield parseSingleArgument () |]
                         else [| parseSingleArgument () |]
 
                     success results

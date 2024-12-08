@@ -294,7 +294,7 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
 
     // use ref cell for late binding of parent argInfo
     let current = ref None
-    let tryGetCurrent = fun () -> !current
+    let tryGetCurrent = fun () -> current.Value
 
     let attributes = lazy uci.GetCustomAttributes()
     let declaringTypeAttributes = lazy uci.DeclaringType.GetCustomAttributes(true)
@@ -538,7 +538,7 @@ let rec private preComputeUnionCaseArgInfo (stack : Type list) (helpParam : Help
         IsHidden = isHidden
     }
 
-    current := Some uai // assign result to children
+    current.Value <- Some uai // assign result to children
     uai
 
 and private preComputeUnionArgInfoInner (stack : Type list) (helpParam : HelpParam option) (tryGetParent : unit -> UnionCaseArgInfo option) (t : Type) : UnionArgInfo =
@@ -569,7 +569,7 @@ and private preComputeUnionArgInfoInner (stack : Type list) (helpParam : HelpPar
 
     // use ref cell for late binding of parent argInfo
     let current = ref Unchecked.defaultof<_>
-    let getCurrent = fun () -> !current
+    let getCurrent = fun () -> current.Value
 
     let caseInfo = lazy(
         FSharpType.GetUnionCases(t, allBindings)
@@ -637,7 +637,7 @@ and private preComputeUnionArgInfoInner (stack : Type list) (helpParam : HelpPar
         MainCommandParam = mainCommandParam
     }
 
-    current := result // assign result to children
+    current.Value <- result // assign result to children
     result
 
 and preComputeUnionArgInfo<'Template when 'Template :> IArgParserTemplate> () =
